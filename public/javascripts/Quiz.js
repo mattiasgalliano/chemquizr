@@ -224,9 +224,9 @@ function startQuiz() {
         '<div class="container py-2" id="questionAnswerBox">',
             '<div class="row align-items-center">',
                 '<div class="col" id="answerBox">',
-                    '<div class="row" id="answerOne"/></div>',
-                    '<div class="row" id="answerTwo"/></div>',
-                    '<div class="row" id="answerThree"/></div>',
+                    '<div class="row py-2" id="answerOne"/></div>',
+                    '<div class="row py-2" id="answerTwo"/></div>',
+                    '<div class="row py-2" id="answerThree"/></div>',
                 '</div>',
                 '<div class="col" id="questionBox"></div>',
             '</div>',
@@ -432,7 +432,8 @@ function displayAnswers(answers, randomIndices) {
 
     let answerButtonOne =
     $("<button/>", {
-        class: "btn btn-dark py-2",
+        type: "button",
+        class: "btn btn-dark px-4",
         id: "answerButtonOne",
         text: answers[0],
         click: function () { correctAnswer(randomIndices); }
@@ -440,7 +441,8 @@ function displayAnswers(answers, randomIndices) {
 
     let answerButtonTwo =
     $("<button/>", {
-        class: "btn btn-dark py-2",
+        type: "button",
+        class: "btn btn-dark px-4",
         id: "answerButtonTwo",
         text: answers[1],
         click: function () { wrongAnswer(randomIndices); }
@@ -448,7 +450,8 @@ function displayAnswers(answers, randomIndices) {
 
     let answerButtonThree =
     $("<button/>", {
-        class: "btn btn-dark py-2",
+        type: "button",
+        class: "btn btn-dark px-4",
         id: "answerButtonThree",
         text: answers[2],
         click: function () { wrongAnswer(randomIndices); }
