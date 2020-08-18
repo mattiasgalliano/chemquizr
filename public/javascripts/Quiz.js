@@ -120,7 +120,7 @@ function initializeStartButton(containerID) {
 
     let startButton = // define startButton button
     $("<button/>", {
-        class: "btn btn-light",
+        class: "btn btn-dark",
         id: "startButton",
         text: "Start",
         click: function () { startQuiz(); }
@@ -138,7 +138,7 @@ function replaceStartButton(containerID) { // replace start button with pause bu
 
     let pauseButton = // build pause button
     $('<button/>', {
-        class: "btn btn-light",
+        class: "btn btn-dark",
         id: "pauseButton",
         text: "Pause",
         click: function () { pauseQuiz(); }
@@ -244,7 +244,7 @@ function replaceStartButton(containerID) { // replace start button with pause bu
 
     let pauseButton = // build pause
     $('<button/>', {
-        class: "btn btn-light",
+        class: "btn btn-dark",
         id: "pauseButton",
         text: "Pause",
         click: function () { pauseQuiz(); }
@@ -272,7 +272,7 @@ function replacePauseButton(containerID) { // replace pause button with resume b
 
     let resumeButton = // build resume
     $('<button/>', {
-        class: "btn btn-light",
+        class: "btn btn-dark",
         id: "resumeButton",
         text: "Resume",
         click: function () { resumeQuiz(); }
@@ -286,7 +286,7 @@ function replaceResumeButton(containerID) { // replace resume button with pause 
 
     let pauseButton = // build pause
     $('<button/>', {
-        class: "btn btn-light",
+        class: "btn btn-dark",
         id: "pauseButton",
         text: "Pause",
         click: function () { pauseQuiz(); }
@@ -432,7 +432,7 @@ function displayAnswers(answers, randomIndices) {
 
     let answerButtonOne =
     $("<button/>", {
-        class: "btn btn-light py-2",
+        class: "btn btn-dark py-2",
         id: "answerButtonOne",
         text: answers[0],
         click: function () { correctAnswer(randomIndices); }
@@ -440,7 +440,7 @@ function displayAnswers(answers, randomIndices) {
 
     let answerButtonTwo =
     $("<button/>", {
-        class: "btn btn-light py-2",
+        class: "btn btn-dark py-2",
         id: "answerButtonTwo",
         text: answers[1],
         click: function () { wrongAnswer(randomIndices); }
@@ -448,7 +448,7 @@ function displayAnswers(answers, randomIndices) {
 
     let answerButtonThree =
     $("<button/>", {
-        class: "btn btn-light py-2",
+        class: "btn btn-dark py-2",
         id: "answerButtonThree",
         text: answers[2],
         click: function () { wrongAnswer(randomIndices); }
