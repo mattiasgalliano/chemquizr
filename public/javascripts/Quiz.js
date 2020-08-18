@@ -181,7 +181,7 @@ function initializeQuiz() {
 
     $( "#timerBox" ).append( timer ); // append timer container
 
-    quizTimer = returnTimer(12, "timer"); // build timer in timer container
+    quizTimer = returnTimer(120, "timer"); // build timer in timer container
 
     quizTimer.init(); // initialize timer
 
