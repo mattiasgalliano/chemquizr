@@ -22,555 +22,258 @@ upon completion of the quiz a pop up window prints the users score.
 */
 
 /* intantiate global timer div container and timer */
-var timerBox;
-var quizTimer;
 
-/**
- * builds timer object for use in quiz
- * @param {int} initialCount 
- * @param {html element} container 
- */
-function returnTimer(seconds, containerID) { // change to class
+/* init global vars */
+var timer = new Timer(120, "#timerContainer"); // quiz timer
+var questions = 20; // questions remaining
+var score = 0; // quiz score
+var randomIndices = genRandomIndices(99); // random indices for question generation
 
-    var initialSeconds = seconds;
-    var timerHandler;
+console.log(timer);
 
-    console.log("init secs are " + initialSeconds);
+init();
 
-    obj = {};
+function Timer(seconds, containerID) { // test timer class
 
-    obj.init = function() {
-        console.log("init");
-        var timerHandler;
-        seconds = initialSeconds;
-        displayTime(initialSeconds, containerID);
+    this.seconds = seconds;
+    this.timerHandler;
+
+    this.displayTime = function() {
+        var displayMin = Math.floor(this.seconds / 60);
+        var displaySec = this.seconds - displayMin * 60;
+
+        if (displaySec < 10) {displaySec = "0" + displaySec; }
+
+        $( containerID ).text("Time: " + displayMin + ":" + displaySec);
     }
 
-    obj.start = function() {
+    this.start = function() {
         console.log("start");
-        timerHandler = setInterval(obj.step, 1000);
-    }
+        this.timerHandler = setInterval(() => {
+            this.step();
+        }, 1000);
+    };
 
-    obj.pause = function() {
+    this.pause = function() {
         console.log("pause");
-        clearInterval(timerHandler);
-    }
+        clearInterval(this.timerHandler);
+    };
 
-    obj.resume = function() {
-        console.log("resume");
-        timerHandler = setInterval(obj.step, 1000);
-    }
-
-    obj.complete = function() {
+    this.done = function() {
         console.log("complete");
-        finishQuiz();
-    }
+        clearInterval(this.timerHandler);
+        done();
+    };
 
-    obj.reset = function() {
-        clearInterval(timerHandler);
-        second = initialSeconds;
-    }
+    this.reset = function() {
+        console.log("reset");
+        clearInterval(this.timerHandler);
+        this.seconds = seconds;
+        console.log(this.seconds);
+        this.displayTime(this.seconds); // display new time
+    };
 
-    obj.step = function() {
+    this.step = function() {
+        console.log("step ", this.seconds);
 
-        if (seconds < 1) {
-            clearInterval(timerHandler);
-            obj.complete();
-            return obj;
-        }
+        this.displayTime(seconds);
 
-        seconds--;
-        displayTime(seconds, containerID);
-    }
+        if (this.seconds < 1) {
+            this.done();
+        }        
 
-    function displayTime(displaySeconds, containerID) {
-
-        var time = displaySeconds;
-        var m = Math.floor(time/60);
-        var s = (function() {
-            let temp = time - m*60;
-            if (temp < 10) {return ("0" + temp.toString());}
-            else {return temp.toString();}
-        })();
-        m = m.toString();
-
-        time = ("Time: " + m + ":" + s);
-
-        $( "#" + containerID ).text(time);
-        console.log("displaying..." + displaySeconds + " seconds");
-        return;
-    }
-
-    return obj;
+        this.seconds--;
+    };
 }
 
-/* quiz */
-/**
- * Initialize start button. Generate button box container and start button
- * @param {} containerID 
- */
-function initializeStartButton(containerID) {
-    let buttonBox = // define buttonBox container
-    $("<div/>", {
-        class: "container",
-        id: "buttonBox"
+function init() {
+    $( "#controlButton" ).text("Start"); // init controlButton
+    console.log("changed text");
+    $( "#controlButton" ).click( function() {
+        setTimeout(() => { start(); }, 300);
     });
     
-    $( "#" + containerID).append(buttonBox); // append buttonBox
+    timer.displayTime(); // init info
+    $( "#questionsContainer" ).text("Questions: " + questions.toString());
+    $( "#scoreContainer" ).text("Score: " + score.toString());
+    console.log("changed text");
 
-    let startButton = // define startButton button
-    $("<button/>", {
-        class: "btn btn-dark",
-        id: "startButton",
-        text: "Start",
-        click: function () { startQuiz(); }
-    });
-    
-    $( buttonBox ).append(startButton); // append startButton
+    nextQuestion(); // init question and hide
+    $( "#questionAnswersContainer" ).hide();
 }
 
-/**
- * Replace start button with pause button
- * @param {*} containerID 
- */
-function replaceStartButton(containerID) { // replace start button with pause button
-    $( "#startButton" ).remove(); // remove startButton
-
-    let pauseButton = // build pause button
-    $('<button/>', {
-        class: "btn btn-dark",
-        id: "pauseButton",
-        text: "Pause",
-        click: function () { pauseQuiz(); }
+function start() {
+    timer.start();
+    console.log("start");
+    $( "#controlButton" ).text("Pause"); // change controlButton
+    $( "#controlButton" ).off("click");
+    $( "#controlButton" ).click( function() {
+        setTimeout(() => { pause(); }, 300);
     });
 
-    $( "#" + containerID ).append( pauseButton ); // append pause
+    $( "#questionAnswersContainer").show(); // show question
+
+     // start timer
 }
 
-/**
- * build start button as child of parent node
- * @param {html element} parent 
- */
-function initializeQuiz() {
+function pause() {
+
+    timer.pause(); // pause timer
+    console.log(timer);
+    $( "#controlButton" ).text("Resume"); // change controlButton
+    $( "#controlButton" ).off("click");
+    $( "#controlButton" ).click( function() {
+        setTimeout(() => { start(); }, 300);
+    });
+
+    $( "#questionAnswersContainer").hide(); // hide question
 
     
+}
 
-    /* start button */
-    initializeStartButton("quizBox"); // initialize start button
+function done() {
+    alert("Congratulations your final score was: " + score.toString()); // print final score
 
-    /* info box */
-    let infoBox = [ // 1x5 info box container
-        '<div class="container py-4" id="infoBox">',
-            '<div class="row">',
-                '<div class="col-sm"></div>',
-                '<div class="col-sm" id="timerBox"></div>', // timer box container
-                '<div class="col-sm" id="questionsBox"></div>', // questions remaining box container
-                '<div class="col-sm" id="scoreBox"></div>', // score box container
-                '<div class="col-sm"></div>',
-            '</div>',
-        '</div>'
-    ];
-    $( infoBox.join('')).appendTo( "#quizBox" ); // append info box
+    timer.reset(); // reset global vars
+    questions = 20;
+    score = 0;
+    randomIndices = genRandomIndices(99);
 
-    /* info box items */
-    let timer = // build timer container
-    $("<div/>", {
-        class: "container",
-        id: "timer"
+    var controlButton = // reset controlButton
+    // remove click necessary?
+    $( "#controlButton" ).text("Start");
+    $( "#controlButton" ).off("click");
+    $( "#controlButton" ).click( function() {
+        setTimeout(() => { start(); }, 300);
     });
 
-    $( "#timerBox" ).append( timer ); // append timer container
+    //$( "#timerContainer" ).text(timer.getTime()); // re-init info
+    $( "#questionsContainer" ).text("Questions: " + questions.toString());
+    $( "#scoreContainer" ).text("Score: " + score.toString());
 
-    quizTimer = returnTimer(120, "timer"); // build timer in timer container
-
-    quizTimer.init(); // initialize timer
-
-    let questions = // build questions remaining container
-    $("<div/>", {
-        class: "container",
-        id: "questions",
-    });
-    $( questions ).data('value', '20'); // init questions remaining data-value
-    let questionsInitString = "Questions: " + questions.data('value'); // build init questions remaining text
-    $( questions ).text(questionsInitString); // init questions remaining text
-    $( "#questionsBox" ).append( questions ); // append questions remaining container
-
-    let score = // build score container
-    $("<div/>", { // init
-        class: "container",
-        id: "score",
-    });
-    $( score ).data('value', '0'); // init score data-value
-    let scoreInitString = "Score: " + score.data('value'); // build init score text
-    $( score ).text(scoreInitString); // init score text
-    $( "#scoreBox" ).append( score ); // append score container
+    nextQuestion(); // reset question and hide
+    $( "#questionAnswersContainer").hide(); // hide question
 }
 
-/**
- * start quiz
- * @param {html element} parent 
- */
-function startQuiz() {
+async function nextQuestion() { // async as answers data fetched from JSON files
+    // next question
+    var questionIndex = randomIndices[randomIndices.length-1]; // last index
+    var questionSource = "images/" + questionIndex.toString() + ".png";
+    $( "#question" ).attr("src", questionSource);
 
-    var randomIndices = generateRandomIndices(98); // generate 60 random indices <= 98
-    console.log("set new indices... last..." + randomIndices[randomIndices.length-1]);
-
-    quizTimer.start(); // start timer box
-
-    replaceStartButton("buttonBox"); // replace start button with pause button
-
-    /* questionanswerbox */
-    let questionAnswerBox = [ // 5x9 question answer box container
-        '<div class="container py-2" id="questionAnswerBox">',
-            '<div class="row align-items-center">',
-                '<div class="col" id="answerBox">',
-                    '<div class="row py-2" id="answerOne"/></div>',
-                    '<div class="row py-2" id="answerTwo"/></div>',
-                    '<div class="row py-2" id="answerThree"/></div>',
-                '</div>',
-                '<div class="col" id="questionBox"></div>',
-            '</div>',
-        '</div>',
-    ];
-    $( questionAnswerBox.join('')).appendTo( "#quizBox" ); // append question answer box
-
-    generateQuestion(randomIndices); // generate questions
-
-    generateAnswers(randomIndices); // generate answers
-}
-
-function replaceStartButton(containerID) { // replace start button with pause button
-    $( "#startButton" ).remove(); // remove start
-
-    let pauseButton = // build pause
-    $('<button/>', {
-        class: "btn btn-dark",
-        id: "pauseButton",
-        text: "Pause",
-        click: function () { pauseQuiz(); }
-    });
-
-    $( "#" + containerID ).append( pauseButton ); // append pause
-}
-
-/**
- * pause quiz
- * @param {html element} parent 
- */
-function pauseQuiz() {
-    console.log("paused");
-
-    quizTimer.pause(); // pause timer
-
-    replacePauseButton("buttonBox"); // replace pause button with resume button
-
-    $( "#questionAnswerBox" ).hide(); // hide question and answers
-}
-
-function replacePauseButton(containerID) { // replace pause button with resume button
-    $( "#pauseButton" ).remove(); // remove pause
-
-    let resumeButton = // build resume
-    $('<button/>', {
-        class: "btn btn-dark",
-        id: "resumeButton",
-        text: "Resume",
-        click: function () { resumeQuiz(); }
-    });
-
-    $( "#" + containerID ).append( resumeButton ); // append resume
-}
-
-function replaceResumeButton(containerID) { // replace resume button with pause button
-    $( "#resumeButton" ).remove(); // remove resume
-
-    let pauseButton = // build pause
-    $('<button/>', {
-        class: "btn btn-dark",
-        id: "pauseButton",
-        text: "Pause",
-        click: function () { pauseQuiz(); }
-    });
-
-    $( "#" + containerID ).append( pauseButton ); // append pause
-}
-
-/**
- * resume quiz
- * @param {html element} parent 
- */
-function resumeQuiz() {
-    console.log("resumed");
-
-    quizTimer.resume(); // resume timer
-
-    replaceResumeButton("buttonBox"); // replace resume button with pause button
-
-    $( "#questionAnswerBox" ).show(); // show question and answers
-}
-
-/**
- * finish quiz
- */
-function finishQuiz() {
-
-    /* increment score */
-    let score = ($( "#score" ).data('value')); // get current score
-    alert("Congratulations your score was: " + score);
-
-    quizTimer.reset();
-
-
-    $( "#buttonBox" ).remove();
-    $( "#infoBox" ).remove();
-    $( "#questionAnswerBox").remove();
-
-    initializeQuiz();
-    return;
-}
-
-/**
- * generate stats as children of stats div container
- * @param {html element} parent 
- */
-function generateInfo(containderID) {
-    /* build number correct counter element */
-    let questions =
-    $("<div/>", { // init
-        class: "container",
-        id: "questions",
-    });
-    $( questions ).data('value', '20'); // init data
-    console.log(questions);
-    console.log($( questions ).data('value'));
-    let questionsInitString = "Questions: " + questions.data('value'); // build init text
-    $( questions ).text(questionsInitString); // init text
-    
-    console.log($( questions ).text());
-
-    $( "#questionsBox" ).append( questions ); // append
-    
-
-    /* build number remaining counter element */
-    let numberRemaining = '<div class="div" type="div" id="numberRemaining" value="0">test</div>';
-
-    $( numberRemaining ).appendTo( "#remainingBox" );
-}
-
-/**
- * generate question element (img) as child of question div container
- * with random indices
- * @param {html element} parent 
- * @param {int list} randomIndices 
- */
-function generateQuestion(randomIndices) {
-    let index = randomIndices[randomIndices.length-1]; // get last index
-
-    let qString = String.raw`<img src="images/` + index + String.raw`.png" class="img-fluid rounded" id = "question" alt="Responsive image" />`; // build jQuery string w index
-
-    console.log("qstring " + qString);
-
-    $( "#questionBox" ).append( qString );
-}
-
-/**
- * generate answer elements (buttons) as children of answer div container
- * with random indices
- * @param {html element} parent 
- * @param {int list} randomIndices 
- */
-async function generateAnswers(randomIndices) {
-    let indices = [ // get last three indices
+    // next answers
+    var answerIndices = [ // last three indices
         randomIndices[randomIndices.length-1],
         randomIndices[randomIndices.length-2],
         randomIndices[randomIndices.length-3]
     ];
 
-    console.log("last index is " + indices[0]);
-
-    let filenames = [ // use indices to build json filenames
-        "jsons/" + indices[0] + ".json",
-        "jsons/" + indices[1] + ".json",
-        "jsons/" + indices[2] + ".json"
+    var answerFilenames = [ // JSON filenames
+        "jsons/" + answerIndices[0] + ".json",
+        "jsons/" + answerIndices[1] + ".json",
+        "jsons/" + answerIndices[2] + ".json"
     ];
 
-
-    let responses = await Promise.all([ // fetch json files
-        fetch(filenames[0]),
-        fetch(filenames[1]),
-        fetch(filenames[2])
+    var answerResponses = await Promise.all([ // fetch JSON files
+        fetch(answerFilenames[0]),
+        fetch(answerFilenames[1]),
+        fetch(answerFilenames[2])
     ]);
 
-    let jsons = await Promise.all([ // resolve fetch promises
-        responses[0].json(),
-        responses[1].json(),
-        responses[2].json()        
+    var answerJSONS = await Promise.all([ // resolve JSON responses
+        answerResponses[0].json(),
+        answerResponses[1].json(),
+        answerResponses[2].json()
     ]);
 
-    let answers = [ // access chemical names in json files
-        jsons[0]['PC_Compounds']['0']['props']['6']['value']['sval'],
-        jsons[1]['PC_Compounds']['0']['props']['6']['value']['sval'],
-        jsons[2]['PC_Compounds']['0']['props']['6']['value']['sval']
+    var answerContents = [ // access chemical names in JSONS
+        answerJSONS[0]['PC_Compounds']['0']['props']['6']['value']['sval'],
+        answerJSONS[1]['PC_Compounds']['0']['props']['6']['value']['sval'],
+        answerJSONS[2]['PC_Compounds']['0']['props']['6']['value']['sval']
     ];
 
-    displayAnswers(answers, randomIndices) // build buttons with chemical names
+    // answer buttons, random button is correct
+
+    var answerAssigner = [ // map correct answer with correct function
+        [answerContents[0], correct], // correct answer
+        [answerContents[1], wrong],
+        [answerContents[2], wrong]
+    ];
+    
+    console.log(answerAssigner);
+    
+    var shuffledAnswerAssigner = shuffleArray(answerAssigner); // shuffle map
+
+    console.log(shuffledAnswerAssigner);
+
+    
+    $( "#answerButtonOne" ).text(shuffledAnswerAssigner[0][0]);
+    $( "#answerButtonOne" ).off("click");
+    $( "#answerButtonOne" ).click( shuffledAnswerAssigner[0][1] );
+
+    $( "#answerButtonTwo" ).text(shuffledAnswerAssigner[1][0]);
+    $( "#answerButtonTwo" ).off("click");
+    $( "#answerButtonTwo" ).click( shuffledAnswerAssigner[1][1] );
+
+    $( "#answerButtonThree" ).text(shuffledAnswerAssigner[2][0]);
+    $( "#answerButtonThree" ).off("click");
+    $( "#answerButtonThree" ).click( shuffledAnswerAssigner[2][1] );
+     
 }
 
-/**
- * build answer buttons with chemical names and add as children to answer div container
- * @param {html element} parent 
- * @param {string list} answers 
- * @param {int list} randomIndices 
- */
-function displayAnswers(answers, randomIndices) {
+function correct() {
+    // dec, done if 0
+    questions--;
+    $( "#questionsContainer" ).text("Questions: " + questions.toString());
+    if (questions == 0) { return done(); }
 
-    //$( "<p>a1</p>" ).appendTo( "#answerBox" );
-    //$( "<p>a2</p>" ).appendTo( "#answerBox" );
-    //$( "<p>a3</p>" ).appendTo( "#answerBox" );
-    /*
-    /* build answer buttons */
+    // inc score
+    score++;
+    $( "#scoreContainer" ).text("Score: " + score.toString());
 
-    let answerButtonOne =
-    $("<button/>", {
-        type: "button",
-        class: "btn btn-dark px-4",
-        id: "answerButtonOne",
-        text: answers[0],
-        click: function () { correctAnswer(randomIndices); }
-    });
+    // pop indices
+    randomIndices.pop();
+    randomIndices.pop();
+    randomIndices.pop();
 
-    let answerButtonTwo =
-    $("<button/>", {
-        type: "button",
-        class: "btn btn-dark px-4",
-        id: "answerButtonTwo",
-        text: answers[1],
-        click: function () { wrongAnswer(randomIndices); }
-    });
-
-    let answerButtonThree =
-    $("<button/>", {
-        type: "button",
-        class: "btn btn-dark px-4",
-        id: "answerButtonThree",
-        text: answers[2],
-        click: function () { wrongAnswer(randomIndices); }
-    });
-
-    console.log(answerButtonOne);
-
-    /* append to answer div container in random order */
-    let answerButtons = [answerButtonOne, answerButtonTwo, answerButtonThree]; // build list with answer buttons
-
-    let randomIndexOne = Math.floor(Math.random()*3); // create random index 0-2
-
-    $( "#answerOne" ).append(answerButtons.splice(randomIndexOne, 1)[0]) // append random from first random index
-
-    let randomIndexTwo = Math.floor(Math.random()*2); // create random index 0-1
-
-    $( "#answerTwo" ).append(answerButtons.splice(randomIndexTwo, 1)[0]); // append random from second random index
-
-    $( "#answerThree" ).append(answerButtons.pop()); // append last
+    // next question
+    nextQuestion();
 }
 
-/**
- * if correct answer chosen, modify stats, step through quiz
- * @param {html element} parent 
- * @param {int list} randomIndices 
- */
-function correctAnswer(randomIndices) {
+function wrong() {
+    // dec questions, done if 0
+    questions--;
+    $( "#questionsContainer" ).text("Questions: " + questions.toString());
+    if (questions == 0) { return done(); }
 
-    /* increment score */
-    let score = ($( "#score" ).data('value')); // get current questions
-    score++; // increment
-    $( "#score" ).data('value', score.toString()); // update data-value
-    let scoreString = "Score: " + score.toString(); // build updated text
-    $( "#score" ).text(scoreString); // update text
+    // pop indices
+    randomIndices.pop();
+    randomIndices.pop();
+    randomIndices.pop();
 
-    /* decrement questions */
-    let questions = ($( "#questions" ).data('value')); // get current questions
-    questions--; // decrement
-    $( "#questions" ).data('value', questions.toString()); // update data-value
-    let questionsString = "Questions: " + questions.toString(); // build updated text
-    $( "#questions" ).text(questionsString); // update text
-    if (questions == 0) {return finishQuiz();} // if 0 finish
-    else {
-            randomIndices.pop(); // pop three indices to access new questions, answers
-            randomIndices.pop();
-            randomIndices.pop();
-
-            nextQuestion(randomIndices); // generate next question
-            nextAnswers(randomIndices); // generate next answers
-    }
+    // next question
+    nextQuestion();
 }
 
-/**
- * if wrong answer, modify stats, step through quiz
- * @param {html element} parent 
- * @param {int list} randomIndices 
- */
-function wrongAnswer(randomIndices) {
-
-    /* decrement questions */
-    let questions = ($( "#questions" ).data('value')); // get current questions
-    questions--; // decrement
-    $( "#questions" ).data('value', questions.toString()); // update data-value
-    let questionsString = "Questions: " + questions.toString(); // build updated text
-    $( "#questions" ).text(questionsString); // update text
-    if (questions == 0) {return finishQuiz();} // if 0 finish
-    else {
-            randomIndices.pop(); // pop three indices to access new questions, answers
-            randomIndices.pop();
-            randomIndices.pop();
-
-            nextQuestion(randomIndices); // generate next question
-            nextAnswers(randomIndices); // generate next answers
-    }
-}
-
-/**
- * generate next question
- * @param {int list} randomIndices 
- */
-function nextQuestion(randomIndices) {
-    /* remove old question child from parent container */
-    $( "#question" ).remove(); // remove question
-
-    generateQuestion(randomIndices);
-}
-
-/**
- * generate next answers
- * @param {int list} randomIndices 
- */
-function nextAnswers(randomIndices) {
-    /* remove old answer children from parent container */
-    $( "#answerButtonOne" ).remove();
-    $( "#answerButtonTwo" ).remove();
-    $( "#answerButtonThree" ).remove();
-
-    generateAnswers(randomIndices);
-}
-
-/**
- * generate 60 random indices <= max value
- * @param {int} max 
- */
-function generateRandomIndices(max) {
-    let randomIndices = [];
+function genRandomIndices(maxVal) { // generate 60 random indices
+    var randomIndices = [];
     for (let i = 0; i < 60; i++) {
-        let randomIndex = Math.floor(Math.random()*max) + 1;
+        let randomIndex = Math.floor(Math.random()*maxVal) + 1;
         randomIndices.push(randomIndex);
     }
     return randomIndices;
 }
 
-/* run quiz program */
-let quizBox = document.getElementById("quizBox"); // select parent node
-console.log(quizBox);
+function shuffleArray(array) { // fisher-yates shuffle
+    var m = array.length, t, i;
 
-$( ".quizBox" ).append( "<p>Test</p>");
-console.log("success?");
+    while(m) {
+        i = Math.floor(Math.random() * m--);
 
-initializeQuiz(quizBox); // intialize quiz under parent node
+        t = array[m];
+        array[m] = array[i];
+        array[i] = t;
+    }
 
+    return array;
+}
