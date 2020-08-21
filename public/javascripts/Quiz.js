@@ -23,8 +23,11 @@ upon completion of the quiz a pop up window prints the users score.
 
 /* intantiate global timer div container and timer */
 
+// import timer
+import { Timer } from "/javascripts/Timer.js";
+
 /* init global vars */
-var timer = new Timer(120, "#timerContainer"); // quiz timer
+var timer = new Timer(120, "#timerContainer", done); // quiz timer
 var questions = 20; // questions remaining
 var score = 0; // quiz score
 var randomIndices = genRandomIndices(99); // random indices for question generation
@@ -33,64 +36,11 @@ console.log(timer);
 
 init();
 
-function Timer(seconds, containerID) { // test timer class
-
-    this.seconds = seconds;
-    this.timerHandler;
-
-    this.displayTime = function() {
-        var displayMin = Math.floor(this.seconds / 60);
-        var displaySec = this.seconds - displayMin * 60;
-
-        if (displaySec < 10) {displaySec = "0" + displaySec; }
-
-        $( containerID ).text("Time: " + displayMin + ":" + displaySec);
-    }
-
-    this.start = function() {
-        console.log("start");
-        this.timerHandler = setInterval(() => {
-            this.step();
-        }, 1000);
-    };
-
-    this.pause = function() {
-        console.log("pause");
-        clearInterval(this.timerHandler);
-    };
-
-    this.done = function() {
-        console.log("complete");
-        clearInterval(this.timerHandler);
-        done();
-    };
-
-    this.reset = function() {
-        console.log("reset");
-        clearInterval(this.timerHandler);
-        this.seconds = seconds;
-        console.log(this.seconds);
-        this.displayTime(this.seconds); // display new time
-    };
-
-    this.step = function() {
-        console.log("step ", this.seconds);
-
-        this.displayTime(seconds);
-
-        if (this.seconds < 1) {
-            this.done();
-        }        
-
-        this.seconds--;
-    };
-}
-
 function init() {
     $( "#controlButton" ).text("Start"); // init controlButton
     console.log("changed text");
     $( "#controlButton" ).click( function() {
-        setTimeout(() => { start(); }, 300);
+        setTimeout(() => { start(); }, 100);
     });
     
     timer.displayTime(); // init info
@@ -108,7 +58,7 @@ function start() {
     $( "#controlButton" ).text("Pause"); // change controlButton
     $( "#controlButton" ).off("click");
     $( "#controlButton" ).click( function() {
-        setTimeout(() => { pause(); }, 300);
+        setTimeout(() => { pause(); }, 100);
     });
 
     $( "#questionAnswersContainer").show(); // show question
@@ -123,7 +73,7 @@ function pause() {
     $( "#controlButton" ).text("Resume"); // change controlButton
     $( "#controlButton" ).off("click");
     $( "#controlButton" ).click( function() {
-        setTimeout(() => { start(); }, 300);
+        setTimeout(() => { start(); }, 100);
     });
 
     $( "#questionAnswersContainer").hide(); // hide question
@@ -144,7 +94,7 @@ function done() {
     $( "#controlButton" ).text("Start");
     $( "#controlButton" ).off("click");
     $( "#controlButton" ).click( function() {
-        setTimeout(() => { start(); }, 300);
+        setTimeout(() => { start(); }, 100);
     });
 
     //$( "#timerContainer" ).text(timer.getTime()); // re-init info
@@ -218,6 +168,10 @@ async function nextQuestion() { // async as answers data fetched from JSON files
     $( "#answerButtonThree" ).text(shuffledAnswerAssigner[2][0]);
     $( "#answerButtonThree" ).off("click");
     $( "#answerButtonThree" ).click( shuffledAnswerAssigner[2][1] );
+
+    randomIndices.pop();
+    randomIndices.pop();
+    randomIndices.pop();
      
 }
 
@@ -232,9 +186,11 @@ function correct() {
     $( "#scoreContainer" ).text("Score: " + score.toString());
 
     // pop indices
+    /*
     randomIndices.pop();
     randomIndices.pop();
     randomIndices.pop();
+    */
 
     // next question
     nextQuestion();
@@ -247,9 +203,11 @@ function wrong() {
     if (questions == 0) { return done(); }
 
     // pop indices
+    /*
     randomIndices.pop();
     randomIndices.pop();
     randomIndices.pop();
+    */
 
     // next question
     nextQuestion();
