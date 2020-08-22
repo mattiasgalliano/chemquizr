@@ -1,124 +1,137 @@
 /*
-this program generates chemquizr content and mediates user interactions with the quiz.
+Quiz.js
+This script generates chemquizr content and mediates user interactions through the quiz
+through button clicks.
 
-the quiz consists of 20 quesions which the user has 2 minutes to answer.
+In this instance ths quiz consists of 20 questions which the user is given two minutes to
+answer. Specifically, from 100 chemical images, names, 20 random, unique chemical images are
+presented to the user one-by-one, each with three random, unique answer choices, one of which
+matches the chemical structure and is the correct answer. 
 
-start, pause, resume buttons are placed in a container and show / hide the quiz content
-and pause / run the quiz timer appropriately.
+A Timer class is imported from Timer.js and a timer is constructed for the quiz.
 
-a timer object in its own container is set to two minutes for the duration of the quiz.
+Start, pause, resume methods are defined to allow the user to control the quiz, as
+are answer choices and associated correct / wrong answer methods to progress through the
+quiz.
 
-stats (number answers correct, number answers remaining) are placed in unique containers
-and updated accordingly as the user interacts with the quiz.
+Various fields are updated as appropriate as the user interacts with the quiz to
+visually indicate present controller methods available to the user, information relevant
+to the present quiz session, and generate new questions after answers are selected.
 
-questions (chemical images as png files) are placed in a unique container and updated as the user
-proceeds through the quiz.
-
-answers (chemical names as buttons) are placed in a unique container and updated as the user
-proceeds through the quiz. clicking the buttons which represent either correct or incorrect
-answers in relation to the question (image) modifies the quiz stats accordingly.
-
-upon completion of the quiz a pop up window prints the users score.
+Upon completion of the quiz the user's score from the immediate quiz session is printed as
+an alert, and the quiz is reset.
 */
 
-/* intantiate global timer div container and timer */
+import { Timer } from "/javascripts/Timer.js"; // import timer class
 
-// import timer
-import { Timer } from "/javascripts/Timer.js";
-
-/* init global vars */
-var timer = new Timer(120, "#timerContainer", done); // quiz timer
-var questions = 20; // questions remaining
+/* initialize global variables */
+var timer = new Timer(120, "#timerContainer", finish); // quiz timer
+var questions = 20; // quiz questions remaining
 var score = 0; // quiz score
-var randomIndices = genRandomIndices(99); // random indices for question generation
+var randomIndices = genRandomIndices(99); // 60 random indices (0-99) to access random questions
 
-console.log(timer);
-
+/* intialize quiz */
 init();
 
+/**
+ * intialize quiz
+ */
 function init() {
-    $( "#controlButton" ).text("Start"); // init controlButton
-    console.log("changed text");
-    $( "#controlButton" ).click( function() {
+    /* initialize control button to start */
+    $( "#controlButton" ).text("Start"); // display text
+    $( "#controlButton" ).click( function() { // add start click method
         setTimeout(() => { start(); }, 100);
     });
     
-    timer.displayTime(); // init info
-    $( "#questionsContainer" ).text("Questions: " + questions.toString());
-    $( "#scoreContainer" ).text("Score: " + score.toString());
-    console.log("changed text");
+    /* initialize quiz info */
+    timer.displayTime(); // time
+    $( "#questionsContainer" ).text("Questions: " + questions.toString()); // display questions remaining
+    $( "#scoreContainer" ).text("Score: " + score.toString()); // display score
 
-    nextQuestion(); // init question and hide
-    $( "#questionAnswersContainer" ).hide();
+    /* initialize question */
+    newQuestion(); // generate question
+    $( "#questionAnswersContainer" ).hide(); // hide question
 }
 
+/**
+ * start quiz
+ */
 function start() {
-    timer.start();
-    console.log("start");
-    $( "#controlButton" ).text("Pause"); // change controlButton
-    $( "#controlButton" ).off("click");
-    $( "#controlButton" ).click( function() {
+    timer.start(); // start timer
+
+    /* change control button to pause */
+    $( "#controlButton" ).text("Pause"); // display text
+    $( "#controlButton" ).off("click"); // remove previous click method
+    $( "#controlButton" ).click( function() { // add pause click method
         setTimeout(() => { pause(); }, 100);
     });
 
     $( "#questionAnswersContainer").show(); // show question
-
-     // start timer
 }
 
+/**
+ * pause quiz
+ */
 function pause() {
-
     timer.pause(); // pause timer
-    console.log(timer);
-    $( "#controlButton" ).text("Resume"); // change controlButton
-    $( "#controlButton" ).off("click");
-    $( "#controlButton" ).click( function() {
+
+    /* change control button to resume */
+    $( "#controlButton" ).text("Resume"); // display text
+    $( "#controlButton" ).off("click"); // remove previous click method
+    $( "#controlButton" ).click( function() { // add start click method
         setTimeout(() => { start(); }, 100);
     });
 
     $( "#questionAnswersContainer").hide(); // hide question
-
-    
 }
 
-function done() {
+/**
+ * finish quiz
+ */
+function finish() {
     alert("Congratulations your final score was: " + score.toString()); // print final score
 
-    timer.reset(); // reset global vars
-    questions = 20;
-    score = 0;
-    randomIndices = genRandomIndices(99);
+    /* reset global variables */
+    timer.reset(); // timer
+    questions = 20; // questions remaining
+    score = 0; // score
+    randomIndices = genRandomIndices(99); // random indices to access random questions
 
-    var controlButton = // reset controlButton
-    // remove click necessary?
-    $( "#controlButton" ).text("Start");
-    $( "#controlButton" ).off("click");
-    $( "#controlButton" ).click( function() {
+    /* reset control button to start */
+    $( "#controlButton" ).text("Start"); // display text
+    $( "#controlButton" ).off("click"); // remove previous click method
+    $( "#controlButton" ).click( function() { // add start click method
         setTimeout(() => { start(); }, 100);
     });
 
-    //$( "#timerContainer" ).text(timer.getTime()); // re-init info
-    $( "#questionsContainer" ).text("Questions: " + questions.toString());
-    $( "#scoreContainer" ).text("Score: " + score.toString());
+    /* reset quiz info */
+    $( "#questionsContainer" ).text("Questions: " + questions.toString()); // display questions remaining
+    $( "#scoreContainer" ).text("Score: " + score.toString()); // display score
 
-    nextQuestion(); // reset question and hide
+    /* reset question */
+    newQuestion(); // generate new question
     $( "#questionAnswersContainer").hide(); // hide question
 }
 
-async function nextQuestion() { // async as answers data fetched from JSON files
-    // next question
-    var questionIndex = randomIndices[randomIndices.length-1]; // last index
-    var questionSource = "images/" + questionIndex.toString() + ".png";
-    $( "#question" ).attr("src", questionSource);
+/**
+ * generate new quiz question
+ */
+async function newQuestion() { // async as answers data fetched from JSON files
+    /* generate new question */
+    var questionIndex = randomIndices[randomIndices.length-1]; // last random index
+    var questionSource = "images/" + questionIndex.toString() + ".png"; // build question source path string
+    $( "#question" ).attr("src", questionSource); // update question source path
+    
+    /* generate three new answers */
 
-    // next answers
-    var answerIndices = [ // last three indices
+    /* get answers data */
+    var answerIndices = [ // last random indices
         randomIndices[randomIndices.length-1],
         randomIndices[randomIndices.length-2],
         randomIndices[randomIndices.length-3]
     ];
 
-    var answerFilenames = [ // JSON filenames
+    var answerFilenames = [ // build answer source path strings
         "jsons/" + answerIndices[0] + ".json",
         "jsons/" + answerIndices[1] + ".json",
         "jsons/" + answerIndices[2] + ".json"
@@ -136,32 +149,27 @@ async function nextQuestion() { // async as answers data fetched from JSON files
         answerResponses[2].json()
     ]);
 
-    var answerContents = [ // access chemical names in JSONS
+    var answerContents = [ // access chemical names in JSON files
         answerJSONS[0]['PC_Compounds']['0']['props']['6']['value']['sval'],
         answerJSONS[1]['PC_Compounds']['0']['props']['6']['value']['sval'],
         answerJSONS[2]['PC_Compounds']['0']['props']['6']['value']['sval']
     ];
 
-    // answer buttons, random button is correct
-
-    var answerAssigner = [ // map correct answer with correct function
-        [answerContents[0], correct], // correct answer
-        [answerContents[1], wrong],
-        [answerContents[2], wrong]
+    /* update answers */
+    var answerAssigner = [ // build array associating chemical names with appropriate onCorrect / onWrong methods
+        [answerContents[0], onCorrect], // correct answer
+        [answerContents[1], onWrong],
+        [answerContents[2], onWrong]
     ];
     
-    console.log(answerAssigner);
-    
-    var shuffledAnswerAssigner = shuffleArray(answerAssigner); // shuffle map
+    var shuffledAnswerAssigner = shuffleArray(answerAssigner); // shuffle association array
 
-    console.log(shuffledAnswerAssigner);
+    /* assign each answer button random chemical name / method pair */
+    $( "#answerButtonOne" ).text(shuffledAnswerAssigner[0][0]); // update chemical name
+    $( "#answerButtonOne" ).off("click"); // remove previous click method
+    $( "#answerButtonOne" ).click( shuffledAnswerAssigner[0][1] ); // add chemical name-associated click method
 
-    
-    $( "#answerButtonOne" ).text(shuffledAnswerAssigner[0][0]);
-    $( "#answerButtonOne" ).off("click");
-    $( "#answerButtonOne" ).click( shuffledAnswerAssigner[0][1] );
-
-    $( "#answerButtonTwo" ).text(shuffledAnswerAssigner[1][0]);
+    $( "#answerButtonTwo" ).text(shuffledAnswerAssigner[1][0]); // repeat...
     $( "#answerButtonTwo" ).off("click");
     $( "#answerButtonTwo" ).click( shuffledAnswerAssigner[1][1] );
 
@@ -169,60 +177,62 @@ async function nextQuestion() { // async as answers data fetched from JSON files
     $( "#answerButtonThree" ).off("click");
     $( "#answerButtonThree" ).click( shuffledAnswerAssigner[2][1] );
 
+    /* remove random indices used for question */
     randomIndices.pop();
     randomIndices.pop();
     randomIndices.pop();
-     
 }
 
-function correct() {
-    // dec, done if 0
-    questions--;
-    $( "#questionsContainer" ).text("Questions: " + questions.toString());
-    if (questions == 0) { return done(); }
+/**
+ * on correct answer
+ */
+function onCorrect() {
+    /* update questions remaining */
+    questions--; // dec questions remaining
+    $( "#questionsContainer" ).text("Questions: " + questions.toString()); // update questions remaining display
+    if (questions == 0) { return finish(); } // if 0 questions remaining, finish quiz
 
-    // inc score
-    score++;
-    $( "#scoreContainer" ).text("Score: " + score.toString());
+    /* update score */
+    score++; // inc score
+    $( "#scoreContainer" ).text("Score: " + score.toString()); // update score display
 
-    // pop indices
-    /*
-    randomIndices.pop();
-    randomIndices.pop();
-    randomIndices.pop();
-    */
-
-    // next question
-    nextQuestion();
+    /* generate new question */
+    newQuestion();
 }
 
-function wrong() {
-    // dec questions, done if 0
-    questions--;
-    $( "#questionsContainer" ).text("Questions: " + questions.toString());
-    if (questions == 0) { return done(); }
+/**
+ * on wrong answer
+ */
+function onWrong() {
+    /* update questions remaining */
+    questions--; // dec questions remaining
+    $( "#questionsContainer" ).text("Questions: " + questions.toString()); // update questions remaining display
+    if (questions == 0) { return finish(); } // if 0 questions remaining, finish quiz
 
-    // pop indices
-    /*
-    randomIndices.pop();
-    randomIndices.pop();
-    randomIndices.pop();
-    */
-
-    // next question
-    nextQuestion();
+    /* generate new question */
+    newQuestion();
 }
 
-function genRandomIndices(maxVal) { // generate 60 random indices
+/**
+ * helper method to generate 60 random indices for random question access
+ * @param {int} maxVal 
+ */
+function genRandomIndices(maxVal) {
     var randomIndices = [];
+
     for (let i = 0; i < 60; i++) {
         let randomIndex = Math.floor(Math.random()*maxVal) + 1;
         randomIndices.push(randomIndex);
     }
+
     return randomIndices;
 }
 
-function shuffleArray(array) { // fisher-yates shuffle
+/**
+ * helper method to shuffle array for random answer display based on fisher-yates method
+ * @param {array} array 
+ */
+function shuffleArray(array) {
     var m = array.length, t, i;
 
     while(m) {

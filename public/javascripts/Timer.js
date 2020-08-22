@@ -1,10 +1,21 @@
-export { Timer };
+/*
+Timer.js
+Timer class provides timing functionality to quiz scripy. Class constructed with starting seconds,
+container id, and method to execute on timer completion; seconds == 0.
+*/
 
-function Timer(seconds, containerID, onComplete) { // test timer class
+export { Timer }; // export timer class
 
-    this.seconds = seconds;
-    this.timerHandler;
+function Timer(seconds, containerID, finish) {
 
+    this.seconds = seconds; // running seconds
+    this.containerID = containerID // container to display time
+    this.finish = finish // method to execute on timer finish
+    this.timerHandler; // handler for set interval
+
+    /**
+     * convert running seconds to display time and display in container
+     */
     this.displayTime = function() {
         var displayMin = Math.floor(this.seconds / 60);
         var displaySec = this.seconds - displayMin * 60;
@@ -14,41 +25,42 @@ function Timer(seconds, containerID, onComplete) { // test timer class
         $( containerID ).text("Time: " + displayMin + ":" + displaySec);
     }
 
+    /**
+     * start timer by setting handler
+     */
     this.start = function() {
-        console.log("start");
         this.timerHandler = setInterval(() => {
             this.step();
         }, 1000);
     };
 
+    /**
+     * pause timer by clearing handler interval
+     */
     this.pause = function() {
-        console.log("pause");
         clearInterval(this.timerHandler);
     };
 
-    this.done = function() {
-        console.log("complete");
-        clearInterval(this.timerHandler);
-        done();
-    };
-
+    /**
+     * reset timer by clearing handler interval, reset running seconds
+     * to initial passed seconds, display new time
+     */
     this.reset = function() {
-        console.log("reset");
         clearInterval(this.timerHandler);
         this.seconds = seconds;
-        console.log(this.seconds);
-        this.displayTime(this.seconds); // display new time
+        this.displayTime(this.seconds);
     };
 
+    /**
+     * step function to be executed by handler every 1000 ms. display
+     * time, execute finish method if running seconds < 1, dec running
+     * seconds
+     */
     this.step = function() {
-        console.log("step ", this.seconds);
-
         this.displayTime(seconds);
 
         if (this.seconds < 1) {
-            console.log("done");
-            //this.reset();
-            onComplete();
+            finish();
         }        
 
         this.seconds--;
