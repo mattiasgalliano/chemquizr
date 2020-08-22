@@ -11,10 +11,10 @@ var leaderboardsRouter = require('./routes/leaderboards');
 var usersRouter = require('./routes/users');
 
 var app = express();
+
 app.use(cors()); // use cors
 
 app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/')); // use jquery
-
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

@@ -1,3 +1,7 @@
-.img-fluid {
+.background { /* background color */
+  color: #f8f9fa;
+}
+
+.img-fluid { /* question image border */
   border: thin solid black;
 }
