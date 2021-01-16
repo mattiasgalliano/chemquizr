@@ -14,5 +14,18 @@
     "jade": "~1.11.0",
     "jquery": "^3.5.1",
     "morgan": "~1.9.1"
-  }
+  },
+  "main": "app.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mattiasgalliano/chemquizr.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mattiasgalliano/chemquizr/issues"
+  },
+  "homepage": "https://github.com/mattiasgalliano/chemquizr#readme",
+  "description": ""
 }
